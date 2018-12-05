@@ -11,4 +11,16 @@
   $ kubectl create -f postgres.yaml
   ```
   
-3- 
+3- Deploy redis:
+  ```
+  $ kubectl create -f redis.yaml
+  ```
+4- Create a secret to store secret-key-base:
+  ```
+  $ kubectl create secret generic secret-key-base --from-literal=secret-key-base=asecuretokenwouldnormallygohere
+  ```
+5- Create kube job:
+  ```
+  $ kubectl create -f job.yaml
+  ```
+6- 
