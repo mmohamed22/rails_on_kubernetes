@@ -23,4 +23,12 @@
   ```
   $ kubectl create -f job.yaml
   ```
-6- 
+6- Deploy rails:
+  ```
+  $ kubectl create -f rails.yaml
+  ```
+7- Deploy sidekiq:
+  ```
+  $ kubectl create -f sidekiq.yaml 
+  ```
+  
