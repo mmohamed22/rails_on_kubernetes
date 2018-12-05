@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app: drkiq
+spec:
+  ports:
+    - port: 5432
+  selector:
+    app: drkiq
+    tier: postgres
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: drkiq-postgres
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 4Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/tmp/data"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: drkiq-postgresc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: postgres
+  labels:
+    app: drkiq
+spec:
+  replicas: 1
+  selector:
+    app: drkiq
+    tier: postgres
+  template:
+    metadata:
+      name: postgres
+      labels:
+        app: drkiq
+        tier: postgres
+    spec:
+      volumes:
+      - name: drkiq-postgres
+        persistentVolumeClaim:
+          claimName: drkiq-postgresc
+      containers:
+      - name: postgres
+        image: postgres:9.4.5
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-user
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-user-pass
+              key: password
+        - name: POSTGRES_DB
+          value: rails-kube-demo_production
+        - name: PGDATA
+          value: /var/lib/postgresql/data
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - mountPath: "/var/lib/postgresql/data"
+          name: drkiq-postgres

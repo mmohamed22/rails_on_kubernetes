@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: sidekiq
+spec:
+  replicas: 1
+  selector:
+    app: drkiq
+    tier: sidekiq
+  template:
+    metadata:
+      name: sidekiq
+      labels:
+        app: drkiq
+        tier: sidekiq
+    spec:
+      containers:
+      - name: sidekiq
+        image: rails:4
+        args: ["sidekiq -C config/sidekiq.yml"]
+        env:
+        - name: DATABASE_NAME
+          value: "rails-kube-demo_production"
+        - name: DATABASE_PORT
+          value: "5432"
+        - name: DATABASE_URL
+          value: "postgres"
+        - name: DATABASE_USER
+          valueFrom:
+            secretKeyRef:
+              name: "db-user"
+              key: "username"
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: "db-user-pass"
+              key: "password"         
+        - name: RAILS_APP
+          value: "production"
+        - name: REDIS_URL
+          value: "redis"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: SECRET_KEY_BASE
+          valueFrom:
+            secretKeyRef:
+              name: "secret-key-base"
+              key: "secret-key-base"
